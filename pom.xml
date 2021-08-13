@@ -4,16 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cloudfoundry.multiapps</groupId>
     <artifactId>multiapps-controller-parent</artifactId>
-    <version>1.126.0-SNAPSHOT</version>
+    <version>1.127.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>MultiApps Controller Parent</name>
     <description>Multi-Target Application (MTA) deployment service for Cloud Foundry</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.7.0</junit.version>
+        <junit.version>5.7.2</junit.version>
         <junit-platform.version>1.7.0</junit-platform.version>
-        <mockito.version>3.5.13</mockito.version>
+        <mockito.version>3.11.2</mockito.version>
         <derby.version>10.14.2.0</derby.version>
         <h2.version>1.4.200</h2.version>
         <servlet-api.version>4.0.4</servlet-api.version>
@@ -26,15 +26,15 @@
         <snakeyaml.version>1.27</snakeyaml.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <eclipselink.version>2.7.7</eclipselink.version>
+        <eclipselink.version>2.7.9</eclipselink.version>
         <flowable.version>6.6.0</flowable.version>
         <mybatis.version>3.5.7</mybatis.version>
-        <spring.version>5.3.7</spring.version>
+        <spring.version>5.3.9</spring.version>
         <spring-security.version>5.5.1</spring-security.version>
         <nimbus-jose-jwt.version>9.10.1</nimbus-jose-jwt.version>
         <hikari.version>3.4.3</hikari.version>
-        <jackson.version>2.11.2</jackson.version>
-        <liquibase.version>4.1.1</liquibase.version>
+        <jackson.version>2.12.4</jackson.version>
+        <liquibase.version>4.4.1</liquibase.version>
         <liquibase-slf4j.version>4.0.0</liquibase-slf4j.version>
         <cloudfoundry-client.version>2.11.0</cloudfoundry-client.version>
         <reactor-netty.version>0.9.12.RELEASE</reactor-netty.version>
@@ -46,13 +46,13 @@
         <resilience4j.version>1.5.0</resilience4j.version>
         <immutables.version>2.8.8</immutables.version>
         <micrometer.version>1.5.5</micrometer.version>
-        <aliyun-sdk-oss.version>3.11.0</aliyun-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.13.0</aliyun-sdk-oss.version>
         <auto-service.version>1.0</auto-service.version>
-        <java-cfenv.version>2.2.2.RELEASE</java-cfenv.version>
-        <multiapps.version>2.5.1</multiapps.version>
+        <java-cfenv.version>2.4.0</java-cfenv.version>
+        <multiapps.version>2.6.1</multiapps.version>
         <jaxb-api.version>2.3.3</jaxb-api.version>
-        <jaxb-core.version>2.3.0</jaxb-core.version>
-        <jaxb-impl.version>2.3.3</jaxb-impl.version>
+        <jaxb-core.version>2.3.0.1</jaxb-core.version>
+        <jaxb-impl.version>2.3.4</jaxb-impl.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <javax.inject.version>1</javax.inject.version>
     </properties>
@@ -148,7 +148,7 @@
                         <!-- Surefire excludes nested classes by default, so we need to explicitly specify that nothing should 
                             be excluded. -->
                         <excludes>
-                            <exclude />
+                            <exclude/>
                         </excludes>
                         <runOrder>random</runOrder>
                     </configuration>
@@ -767,6 +767,12 @@
             <dependency>
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${aliyun-sdk-oss.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/com.google.auto.service/auto-service -->
