@@ -13,7 +13,7 @@
     </startEvent>
     <serviceTask id="prepareModulesDeploymentTask" name="Extract Services From Batches" flowable:async="true" flowable:exclusive="false" flowable:delegateExpression="${extractBatchedServicesStep}"></serviceTask>
     <sequenceFlow id="flow51" sourceRef="startEvent" targetRef="prepareModulesDeploymentTask"></sequenceFlow>
-    <callActivity id="createOrUpdateServicesCallActivity" name="Create or update services" flowable:async="true" calledElement="createOrUpdateServicesSubProcess" flowable:calledElementType="key" flowable:completeAsync="true" flowable:fallbackToDefaultTenant="false">
+    <callActivity id="createOrUpdateServicesCallActivity" name="Create or update services" flowable:inheritVariables="true" flowable:async="true" calledElement="createOrUpdateServicesSubProcess" flowable:calledElementType="key" flowable:completeAsync="true" flowable:fallbackToDefaultTenant="false">
       <extensionElements>
         <flowable:in source="user" target="user"></flowable:in>
         <flowable:in source="correlationId" target="correlationId"></flowable:in>
