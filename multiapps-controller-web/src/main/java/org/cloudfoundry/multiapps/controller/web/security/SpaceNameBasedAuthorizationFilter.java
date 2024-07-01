@@ -1,11 +1,7 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.cloudfoundry.multiapps.controller.core.auditlogging.LoginAttemptAuditLog;
 import org.cloudfoundry.multiapps.controller.persistence.model.CloudTarget;
 import org.cloudfoundry.multiapps.controller.web.Messages;
@@ -14,6 +10,9 @@ import org.cloudfoundry.multiapps.controller.web.util.ServletUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.text.MessageFormat;
 
 public abstract class SpaceNameBasedAuthorizationFilter extends AbstractUriAuthorizationFilter {
 
@@ -42,10 +41,9 @@ public abstract class SpaceNameBasedAuthorizationFilter extends AbstractUriAutho
             loginAttemptAuditLog.logLoginAttempt(SecurityContextUtil.getUsername(), target.getSpaceName(),
                                                  Messages.USER_FAILED_TO_LOG_IN_AUDIT_LOG_MESSAGE, Messages.LOGIN_ATTEMPT_AUDIT_LOG_CONFIG);
             logUnauthorizedRequest(request, e);
-            response.sendError(e.getStatus()
-                                .value(),
-                               MessageFormat.format(Messages.NOT_AUTHORIZED_TO_OPERATE_IN_ORGANIZATION_0_AND_SPACE_1,
-                                                    target.getOrganizationName(), target.getSpaceName()));
+            response.sendError(e.getStatusCode()
+                                .value(), MessageFormat.format(Messages.NOT_AUTHORIZED_TO_OPERATE_IN_ORGANIZATION_0_AND_SPACE_1,
+                                                               target.getOrganizationName(), target.getSpaceName()));
             return false;
         }
     }
@@ -58,8 +56,7 @@ public abstract class SpaceNameBasedAuthorizationFilter extends AbstractUriAutho
 
     private void logUnauthorizedRequest(HttpServletRequest request, ResponseStatusException e) {
         LOGGER.error(String.format("User with guid \"%s\" is not authorized for request to \"%s\".", extractUserGuid(),
-                                   ServletUtil.decodeUri(request)),
-                     e);
+                                   ServletUtil.decodeUri(request)), e);
     }
 
     protected abstract CloudTarget extractTarget(HttpServletRequest request);

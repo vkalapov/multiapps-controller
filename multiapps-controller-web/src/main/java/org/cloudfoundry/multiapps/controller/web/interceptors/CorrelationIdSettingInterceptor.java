@@ -1,15 +1,14 @@
 package org.cloudfoundry.multiapps.controller.web.interceptors;
 
-import java.util.UUID;
-
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.cloudfoundry.multiapps.controller.api.Constants.PathVariables;
 import org.cloudfoundry.multiapps.controller.core.Constants;
 import org.cloudfoundry.multiapps.controller.web.util.ServletUtil;
 import org.slf4j.MDC;
+
+import javax.inject.Named;
+import java.util.UUID;
 
 @Named
 public class CorrelationIdSettingInterceptor implements CustomHandlerInterceptor {

@@ -1,10 +1,7 @@
 package org.cloudfoundry.multiapps.controller.web.configuration;
 
-import java.text.MessageFormat;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
 import org.cloudfoundry.multiapps.controller.web.Constants;
 import org.cloudfoundry.multiapps.controller.web.Messages;
@@ -15,6 +12,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.security.web.csrf.MissingCsrfTokenException;
 
+import java.text.MessageFormat;
+
 public class CsrfAccessDeniedHandler implements AccessDeniedHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsrfAccessDeniedHandler.class);
@@ -24,8 +23,7 @@ public class CsrfAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) {
         LOGGER.error(MessageFormat.format(Messages.REQUEST_0_1_FAILED_WITH_2, request.getMethod(), request.getRequestURI(),
-                                          accessDeniedException.getMessage()),
-                     accessDeniedException);
+                                          accessDeniedException.getMessage()), accessDeniedException);
         if (accessDeniedException instanceof InvalidCsrfTokenException || accessDeniedException instanceof MissingCsrfTokenException) {
             response.setHeader(Constants.CSRF_TOKEN, CSRF_TOKEN_REQUIRED_HEADER_VALUE);
         }

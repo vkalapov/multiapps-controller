@@ -1,14 +1,10 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import java.text.MessageFormat;
-import java.time.Duration;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
+import com.sap.cloudfoundry.client.facade.CloudCredentials;
+import com.sap.cloudfoundry.client.facade.domain.UserRole;
+import com.sap.cloudfoundry.client.facade.oauth2.OAuth2AccessTokenWithAdditionalInfo;
+import com.sap.cloudfoundry.client.facade.oauth2.TokenFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import org.cloudfoundry.multiapps.common.SLException;
 import org.cloudfoundry.multiapps.controller.core.Messages;
 import org.cloudfoundry.multiapps.controller.core.cf.CloudControllerClientFactory;
@@ -26,10 +22,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sap.cloudfoundry.client.facade.CloudCredentials;
-import com.sap.cloudfoundry.client.facade.domain.UserRole;
-import com.sap.cloudfoundry.client.facade.oauth2.OAuth2AccessTokenWithAdditionalInfo;
-import com.sap.cloudfoundry.client.facade.oauth2.TokenFactory;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.text.MessageFormat;
+import java.time.Duration;
+import java.util.Set;
+import java.util.UUID;
 
 @Named
 public class AuthorizationChecker implements DisposableBean {

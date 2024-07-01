@@ -1,14 +1,7 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.sap.cloudfoundry.client.facade.oauth2.OAuth2AccessTokenWithAdditionalInfo;
+import jakarta.servlet.ServletException;
 import org.cloudfoundry.multiapps.controller.core.util.ApplicationConfiguration;
 import org.cloudfoundry.multiapps.controller.core.util.SSLUtil;
 import org.cloudfoundry.multiapps.controller.core.util.SecurityUtil;
@@ -25,7 +18,9 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sap.cloudfoundry.client.facade.oauth2.OAuth2AccessTokenWithAdditionalInfo;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
 
 @Named
 public class AuthenticationLoaderFilter extends OncePerRequestFilter {
@@ -40,19 +35,6 @@ public class AuthenticationLoaderFilter extends OncePerRequestFilter {
         if (applicationConfiguration.shouldSkipSslValidation()) {
             SSLUtil.disableSSLValidation();
         }
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
-        String authorizationHeaderValue = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeaderValue == null) {
-            failWithUnauthorized(Messages.NO_AUTHORIZATION_HEADER_WAS_PROVIDED);
-        }
-        OAuth2AccessTokenWithAdditionalInfo oAuth2AccessTokenWithAdditionalInfo = generateOauthToken(authorizationHeaderValue);
-        UserInfo tokenUserInfo = SecurityUtil.getTokenUserInfo(oAuth2AccessTokenWithAdditionalInfo);
-        loadAuthenticationInContext(tokenUserInfo);
-        filterChain.doFilter(request, response);
     }
 
     private void failWithUnauthorized(String message) {
@@ -76,4 +58,17 @@ public class AuthenticationLoaderFilter extends OncePerRequestFilter {
                              .setAuthentication(authentication);
     }
 
+    @Override
+    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response,
+                                    jakarta.servlet.FilterChain filterChain) throws IOException, ServletException {
+
+        String authorizationHeaderValue = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorizationHeaderValue == null) {
+            failWithUnauthorized(Messages.NO_AUTHORIZATION_HEADER_WAS_PROVIDED);
+        }
+        OAuth2AccessTokenWithAdditionalInfo oAuth2AccessTokenWithAdditionalInfo = generateOauthToken(authorizationHeaderValue);
+        UserInfo tokenUserInfo = SecurityUtil.getTokenUserInfo(oAuth2AccessTokenWithAdditionalInfo);
+        loadAuthenticationInContext(tokenUserInfo);
+        filterChain.doFilter(request, response);
+    }
 }

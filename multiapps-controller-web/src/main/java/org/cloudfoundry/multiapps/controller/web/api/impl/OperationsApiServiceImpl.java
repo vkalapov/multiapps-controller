@@ -1,37 +1,14 @@
 package org.cloudfoundry.multiapps.controller.web.api.impl;
 
-import java.security.Principal;
-import java.text.MessageFormat;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-import javax.servlet.http.HttpServletRequest;
-
+import com.sap.cloudfoundry.client.facade.domain.CloudOrganization;
+import com.sap.cloudfoundry.client.facade.domain.CloudSpace;
+import com.sap.cloudfoundry.client.facade.rest.CloudSpaceClient;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.ListUtils;
 import org.cloudfoundry.multiapps.common.ContentException;
 import org.cloudfoundry.multiapps.common.NotFoundException;
 import org.cloudfoundry.multiapps.controller.api.OperationsApiService;
-import org.cloudfoundry.multiapps.controller.api.model.ImmutableLog;
-import org.cloudfoundry.multiapps.controller.api.model.ImmutableMessage;
-import org.cloudfoundry.multiapps.controller.api.model.ImmutableOperation;
-import org.cloudfoundry.multiapps.controller.api.model.Log;
-import org.cloudfoundry.multiapps.controller.api.model.Message;
-import org.cloudfoundry.multiapps.controller.api.model.MessageType;
-import org.cloudfoundry.multiapps.controller.api.model.Operation;
-import org.cloudfoundry.multiapps.controller.api.model.ParameterMetadata;
+import org.cloudfoundry.multiapps.controller.api.model.*;
 import org.cloudfoundry.multiapps.controller.api.model.parameters.ParameterConversion;
 import org.cloudfoundry.multiapps.controller.core.auditlogging.OperationsApiServiceAuditLog;
 import org.cloudfoundry.multiapps.controller.core.cf.CloudControllerClientFactory;
@@ -62,9 +39,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sap.cloudfoundry.client.facade.domain.CloudOrganization;
-import com.sap.cloudfoundry.client.facade.domain.CloudSpace;
-import com.sap.cloudfoundry.client.facade.rest.CloudSpaceClient;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.NoResultException;
+import java.security.Principal;
+import java.text.MessageFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Named
 public class OperationsApiServiceImpl implements OperationsApiService {
@@ -106,8 +90,9 @@ public class OperationsApiServiceImpl implements OperationsApiService {
         Operation operation = getOperationByOperationGuidAndSpaceGuid(operationId, spaceGuid);
         List<String> availableOperations = getAvailableActions(operation);
         if (!availableOperations.contains(actionId)) {
-            throw new IllegalArgumentException(MessageFormat.format(Messages.ACTION_0_CANNOT_BE_EXECUTED_OVER_OPERATION_1_IN_STATE_2,
-                                                                    actionId, operationId, operation.getState()));
+            throw new IllegalArgumentException(
+                MessageFormat.format(Messages.ACTION_0_CANNOT_BE_EXECUTED_OVER_OPERATION_1_IN_STATE_2, actionId, operationId,
+                                     operation.getState()));
         }
         ProcessAction action = processActionRegistry.getAction(Action.fromString(actionId));
         action.execute(getAuthenticatedUser(request), operationId);
@@ -284,7 +269,8 @@ public class OperationsApiServiceImpl implements OperationsApiService {
         Map<String, Object> operationParameters = operation.getParameters();
         Set<ParameterMetadata> requiredParameters = getRequiredParameters(predefinedParameters);
         List<ParameterMetadata> missingRequiredParameters = requiredParameters.stream()
-                                                                              .filter(parameter -> !operationParameters.containsKey(parameter.getId()))
+                                                                              .filter(parameter -> !operationParameters.containsKey(
+                                                                                  parameter.getId()))
                                                                               .collect(Collectors.toList());
         if (!missingRequiredParameters.isEmpty()) {
             throw new ContentException("Required parameters " + getParameterIds(missingRequiredParameters) + " are not set!");

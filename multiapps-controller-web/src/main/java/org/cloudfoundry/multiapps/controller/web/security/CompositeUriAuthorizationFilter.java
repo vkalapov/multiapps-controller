@@ -1,18 +1,17 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.cloudfoundry.multiapps.controller.web.resources.CFExceptionMapper;
 import org.cloudfoundry.multiapps.controller.web.util.ServletUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.List;
 
 @Named("compositeUriAuthorizationFilter")
 public class CompositeUriAuthorizationFilter extends AuthorizationFilter {
@@ -50,8 +49,7 @@ public class CompositeUriAuthorizationFilter extends AuthorizationFilter {
     }
 
     private boolean ensureUserIsAuthorized(UriAuthorizationFilter uriAuthorizationFilter, HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws IOException {
+                                           HttpServletResponse response) throws IOException {
         LOGGER.debug("Using authorization filter {} for request to \"{}\".", uriAuthorizationFilter, ServletUtil.decodeUri(request));
         return uriAuthorizationFilter.ensureUserIsAuthorized(request, response);
     }

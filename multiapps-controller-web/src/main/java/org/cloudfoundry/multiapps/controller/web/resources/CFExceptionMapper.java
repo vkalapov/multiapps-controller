@@ -1,9 +1,7 @@
 package org.cloudfoundry.multiapps.controller.web.resources;
 
-import java.sql.SQLException;
-
-import javax.servlet.ServletException;
-
+import com.sap.cloudfoundry.client.facade.CloudOperationException;
+import jakarta.servlet.ServletException;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.cloudfoundry.multiapps.common.ConflictException;
 import org.cloudfoundry.multiapps.common.ContentException;
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sap.cloudfoundry.client.facade.CloudOperationException;
+import java.sql.SQLException;
 
 @ControllerAdvice
 public class CFExceptionMapper {

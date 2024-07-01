@@ -1,28 +1,15 @@
 package org.cloudfoundry.multiapps.controller.web.api.impl;
 
-import static org.cloudfoundry.multiapps.controller.core.util.SecurityUtil.USER_INFO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.security.Principal;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.persistence.NoResultException;
-import javax.servlet.http.HttpServletRequest;
-
+import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudMetadata;
+import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudOrganization;
+import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudSpace;
+import com.sap.cloudfoundry.client.facade.rest.CloudSpaceClient;
+import jakarta.servlet.http.HttpServletRequest;
 import org.cloudfoundry.multiapps.common.ContentException;
 import org.cloudfoundry.multiapps.common.NotFoundException;
 import org.cloudfoundry.multiapps.controller.api.model.ImmutableOperation;
 import org.cloudfoundry.multiapps.controller.api.model.Operation;
 import org.cloudfoundry.multiapps.controller.api.model.ProcessType;
-import org.cloudfoundry.multiapps.controller.core.auditlogging.AuditLoggingFacade;
 import org.cloudfoundry.multiapps.controller.core.auditlogging.OperationsApiServiceAuditLog;
 import org.cloudfoundry.multiapps.controller.core.cf.CloudControllerClientFactory;
 import org.cloudfoundry.multiapps.controller.core.security.token.TokenService;
@@ -42,22 +29,20 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudMetadata;
-import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudOrganization;
-import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudSpace;
-import com.sap.cloudfoundry.client.facade.rest.CloudSpaceClient;
+import javax.persistence.NoResultException;
+import java.security.Principal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.cloudfoundry.multiapps.controller.core.util.SecurityUtil.USER_INFO;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OperationsApiServiceImplTest {
 
@@ -128,8 +113,7 @@ class OperationsApiServiceImplTest {
     void testGetOperations() {
         ResponseEntity<List<Operation>> response = operationsApiService.getOperations(SPACE_GUID, null,
                                                                                       List.of(Operation.State.FINISHED.toString(),
-                                                                                              Operation.State.ABORTED.toString()),
-                                                                                      1);
+                                                                                              Operation.State.ABORTED.toString()), 1);
 
         List<Operation> operations = response.getBody();
         assertEquals(2, operations.size());
@@ -141,9 +125,8 @@ class OperationsApiServiceImplTest {
 
     @Test
     void testGetOperationsNotFound() {
-        ResponseEntity<List<Operation>> response = operationsApiService.getOperations(SPACE_GUID, MTA_ID,
-                                                                                      Collections.singletonList(Operation.State.ACTION_REQUIRED.toString()),
-                                                                                      1);
+        ResponseEntity<List<Operation>> response = operationsApiService.getOperations(SPACE_GUID, MTA_ID, Collections.singletonList(
+            Operation.State.ACTION_REQUIRED.toString()), 1);
 
         List<Operation> operations = response.getBody();
         assertTrue(operations.isEmpty());
@@ -293,9 +276,8 @@ class OperationsApiServiceImplTest {
     }
 
     private void mockClientProvider(String user) {
-        org.cloudfoundry.multiapps.controller.core.util.UserInfo userInfo = new org.cloudfoundry.multiapps.controller.core.util.UserInfo(null,
-                                                                                                                                         user,
-                                                                                                                                         null);
+        org.cloudfoundry.multiapps.controller.core.util.UserInfo userInfo = new org.cloudfoundry.multiapps.controller.core.util.UserInfo(
+            null, user, null);
         OAuth2AuthenticationToken auth = Mockito.mock(OAuth2AuthenticationToken.class);
         Map<String, Object> attributes = Map.of(USER_INFO, userInfo);
         OAuth2User principal = Mockito.mock(OAuth2User.class);
@@ -303,7 +285,8 @@ class OperationsApiServiceImplTest {
                .thenReturn(attributes);
         Mockito.when(auth.getPrincipal())
                .thenReturn(principal);
-        org.springframework.security.core.context.SecurityContext securityContextMock = Mockito.mock(org.springframework.security.core.context.SecurityContext.class);
+        org.springframework.security.core.context.SecurityContext securityContextMock = Mockito.mock(
+            org.springframework.security.core.context.SecurityContext.class);
         SecurityContextHolder.setContext(securityContextMock);
         Mockito.when(securityContextMock.getAuthentication())
                .thenReturn(auth);
@@ -355,33 +338,33 @@ class OperationsApiServiceImplTest {
                .thenReturn(operationQuery);
 
         Mockito.doAnswer(invocation -> {
-            processId = (String) invocation.getArguments()[0];
-            return operationQuery;
-        })
+                   processId = (String) invocation.getArguments()[0];
+                   return operationQuery;
+               })
                .when(operationQuery)
                .processId(Mockito.anyString());
         Mockito.doAnswer(invocation -> {
-            Optional<Operation> foundOperation = operations.stream()
-                                                           .filter(operation -> operation.getProcessId()
-                                                                                         .equals(processId))
-                                                           .findFirst();
-            if (!foundOperation.isPresent()) {
-                throw new NoResultException("not found");
-            }
-            return foundOperation.get();
-        })
+                   Optional<Operation> foundOperation = operations.stream()
+                                                                  .filter(operation -> operation.getProcessId()
+                                                                                                .equals(processId))
+                                                                  .findFirst();
+                   if (!foundOperation.isPresent()) {
+                       throw new NoResultException("not found");
+                   }
+                   return foundOperation.get();
+               })
                .when(operationQuery)
                .singleResult();
 
         Mockito.doAnswer(invocation -> {
-            operationStatesToFilter = (List<Operation.State>) invocation.getArguments()[0];
-            return operationQuery;
-        })
+                   operationStatesToFilter = (List<Operation.State>) invocation.getArguments()[0];
+                   return operationQuery;
+               })
                .when(operationQuery)
                .withStateAnyOf(Mockito.anyList());
         Mockito.doAnswer(invocation -> operations.stream()
-                                                 .filter(operation -> operationStatesToFilter == null
-                                                     || operationStatesToFilter.contains(operation.getState()))
+                                                 .filter(operation -> operationStatesToFilter == null || operationStatesToFilter.contains(
+                                                     operation.getState()))
                                                  .collect(Collectors.toList()))
                .when(operationQuery)
                .list();

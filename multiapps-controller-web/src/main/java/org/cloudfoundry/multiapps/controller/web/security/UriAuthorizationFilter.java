@@ -1,9 +1,9 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import java.io.IOException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public interface UriAuthorizationFilter {
 

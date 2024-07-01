@@ -1,30 +1,26 @@
 package org.cloudfoundry.multiapps.controller.web.bootstrap;
 
-import static java.text.MessageFormat.format;
-
-import java.text.MessageFormat;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.sql.DataSource;
-
-import org.cloudfoundry.multiapps.controller.core.auditlogging.UserInfoProvider;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import org.cloudfoundry.multiapps.controller.core.util.ApplicationConfiguration;
 import org.cloudfoundry.multiapps.controller.persistence.services.FileService;
 import org.cloudfoundry.multiapps.controller.persistence.services.LockOwnerService;
 import org.cloudfoundry.multiapps.controller.process.util.LockOwnerReleaser;
 import org.cloudfoundry.multiapps.controller.web.Messages;
-import org.cloudfoundry.multiapps.controller.web.util.SecurityContextUtil;
 import org.flowable.engine.ProcessEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.text.MessageFormat;
+
+import static java.text.MessageFormat.format;
 
 public class BootstrapServlet extends HttpServlet {
 

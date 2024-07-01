@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cloudfoundry.multiapps</groupId>
     <artifactId>multiapps-controller-parent</artifactId>
@@ -13,13 +13,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>cloudfoundry</sonar.organization>
-        <sonar.coverage.jacoco.xmlReportPaths>../multiapps-controller-coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>../multiapps-controller-coverage/target/site/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
         <junit.version>5.10.2</junit.version>
         <junit-platform.version>1.10.2</junit-platform.version>
         <mockito.version>5.11.0</mockito.version>
         <derby.version>10.16.1.1</derby.version>
         <h2.version>2.2.224</h2.version>
-        <servlet-api.version>4.0.4</servlet-api.version>
+        <servlet-api.version>6.1.0</servlet-api.version>
         <log4j.version>2.23.1</log4j.version>
         <slf4j.version>2.0.12</slf4j.version>
         <commons-io.version>2.16.1</commons-io.version>
@@ -31,7 +32,7 @@
         <eclipselink.version>2.7.14</eclipselink.version>
         <flowable.version>6.8.0</flowable.version>
         <mybatis.version>3.5.16</mybatis.version>
-        <spring.version>5.3.34</spring.version>
+        <spring.version>6.1.10</spring.version>
         <spring-security.version>5.8.11</spring-security.version>
         <json-smart.version>2.5.1</json-smart.version>
         <hikari.version>5.1.0</hikari.version>
@@ -88,7 +89,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/cloudfoundry-incubator/multiapps-controller.git</connection>
-        <developerConnection>scm:git:https://github.com/cloudfoundry-incubator/multiapps-controller.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/cloudfoundry-incubator/multiapps-controller.git
+        </developerConnection>
         <url>https://github.com/cloudfoundry-incubator/multiapps-controller.git</url>
         <tag>HEAD</tag>
     </scm>
@@ -238,7 +240,7 @@
                     <version>0.8.10</version>
                 </plugin>
             </plugins>
-        </pluginManagement>     
+        </pluginManagement>
     </build>
     <dependencies>
         <dependency>
@@ -964,18 +966,18 @@
             <id>coverage</id>
             <build>
                 <plugins>
-                  <plugin>
-                      <groupId>org.jacoco</groupId>
-                      <artifactId>jacoco-maven-plugin</artifactId>
-                      <executions>
-                          <execution>
-                              <id>prepare-agent</id>
-                              <goals>
-                                  <goal>prepare-agent</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                  </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -983,22 +985,22 @@
             <id>sonar</id>
             <build>
                 <plugins>
-                  <plugin>
-                      <groupId>org.sonarsource.scanner.maven</groupId>
-                      <artifactId>sonar-maven-plugin</artifactId>
-                  </plugin>
-                  <plugin>
-                      <groupId>org.jacoco</groupId>
-                      <artifactId>jacoco-maven-plugin</artifactId>
-                      <executions>
-                          <execution>
-                              <id>prepare-agent</id>
-                              <goals>
-                                  <goal>prepare-agent</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                  </plugin>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
