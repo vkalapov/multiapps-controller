@@ -1,21 +1,5 @@
 package org.cloudfoundry.multiapps.controller.core.util;
 
-import static java.text.MessageFormat.format;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.multiapps.common.ParsingException;
@@ -31,7 +15,18 @@ import org.cloudfoundry.multiapps.mta.model.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
 
 @Named
 @Lazy(false)
@@ -108,8 +103,8 @@ public class ApplicationConfiguration {
     public static final Integer DEFAULT_DB_CONNECTION_THREADS = 30;
     public static final String DEFAULT_CRON_EXPRESSION_FOR_OLD_DATA = "0 0 0/6 * * ?"; // every 6 hours
     public static final String DEFAULT_EXECUTION_TIME_FOR_FINISHED_PROCESSES = Long.toString(TimeUnit.HOURS.toMillis(2)); // every 2 hours
-                                                                                                                          // after an
-                                                                                                                          // instance starts
+    // after an
+    // instance starts
     public static final long DEFAULT_MAX_TTL_FOR_OLD_DATA = TimeUnit.DAYS.toSeconds(5); // 5 days
     public static final Integer DEFAULT_STEP_POLLING_INTERVAL_IN_SECONDS = 5;
     public static final Boolean DEFAULT_SKIP_SSL_VALIDATION = false;
@@ -783,7 +778,8 @@ public class ApplicationConfiguration {
     }
 
     private Integer getFilesAsyncUploadExecutorMaxThreadsFromEnvironment() {
-        Integer value = environment.getInteger(CFG_FILES_ASYNC_UPLOAD_EXECUTOR_MAX_THREADS, DEFAULT_FILES_ASYNC_UPLOAD_EXECUTOR_MAX_THREADS);
+        Integer value = environment.getInteger(CFG_FILES_ASYNC_UPLOAD_EXECUTOR_MAX_THREADS,
+                                               DEFAULT_FILES_ASYNC_UPLOAD_EXECUTOR_MAX_THREADS);
         LOGGER.info(format(Messages.FILES_ASYNC_UPLOAD_EXECUTOR_MAX_THREADS, value));
         return value;
     }
@@ -853,10 +849,14 @@ public class ApplicationConfiguration {
 
     private HealthCheckConfiguration getHealthCheckConfigurationFromEnvironment() {
         HealthCheckConfiguration healthCheckConfigurationFromEnvironment = ImmutableHealthCheckConfiguration.builder()
-                                                                                                            .spaceId(getHealthCheckSpaceGuidFromEnvironment())
-                                                                                                            .mtaId(getHealthCheckMtaIdFromEnvironment())
-                                                                                                            .userName(getHealthCheckUserFromEnvironment())
-                                                                                                            .timeRangeInSeconds(getHealthCheckTimeRangeFromEnvironment())
+                                                                                                            .spaceId(
+                                                                                                                getHealthCheckSpaceGuidFromEnvironment())
+                                                                                                            .mtaId(
+                                                                                                                getHealthCheckMtaIdFromEnvironment())
+                                                                                                            .userName(
+                                                                                                                getHealthCheckUserFromEnvironment())
+                                                                                                            .timeRangeInSeconds(
+                                                                                                                getHealthCheckTimeRangeFromEnvironment())
                                                                                                             .build();
         return healthCheckConfigurationFromEnvironment;
     }
@@ -935,7 +935,7 @@ public class ApplicationConfiguration {
 
     private String getCronExpression(String name, String defaultValue) {
         String value = environment.getString(name);
-        if (CronSequenceGenerator.isValidExpression(value)) {
+        if (CronExpression.isValidExpression(value)) {
             return value;
         }
         LOGGER.info(format(Messages.ENVIRONMENT_VARIABLE_IS_NOT_SET_USING_DEFAULT, name, defaultValue));
