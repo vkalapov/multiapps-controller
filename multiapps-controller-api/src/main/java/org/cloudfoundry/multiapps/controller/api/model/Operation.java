@@ -1,27 +1,20 @@
 package org.cloudfoundry.multiapps.controller.api.model;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.annotations.ApiModelProperty;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 import org.cloudfoundry.multiapps.common.AllowNulls;
 import org.cloudfoundry.multiapps.common.Nullable;
 import org.cloudfoundry.multiapps.mta.model.AuditableConfiguration;
 import org.cloudfoundry.multiapps.mta.model.ConfigurationIdentifier;
 import org.immutables.value.Value;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import io.swagger.annotations.ApiModelProperty;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableOperation.class)

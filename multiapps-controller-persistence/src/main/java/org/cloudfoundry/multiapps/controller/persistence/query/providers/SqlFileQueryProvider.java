@@ -1,25 +1,6 @@
 package org.cloudfoundry.multiapps.controller.persistence.query.providers;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import javax.xml.bind.DatatypeConverter;
-
+import jakarta.xml.bind.DatatypeConverter;
 import org.cloudfoundry.multiapps.controller.persistence.Constants;
 import org.cloudfoundry.multiapps.controller.persistence.Messages;
 import org.cloudfoundry.multiapps.controller.persistence.dialects.DataSourceDialect;
@@ -29,6 +10,19 @@ import org.cloudfoundry.multiapps.controller.persistence.query.SqlQuery;
 import org.cloudfoundry.multiapps.controller.persistence.services.FileContentProcessor;
 import org.cloudfoundry.multiapps.controller.persistence.util.JdbcUtil;
 import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.*;
+import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public abstract class SqlFileQueryProvider {
 

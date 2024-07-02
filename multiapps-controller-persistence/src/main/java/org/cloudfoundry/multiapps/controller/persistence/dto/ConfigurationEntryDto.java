@@ -1,24 +1,14 @@
 package org.cloudfoundry.multiapps.controller.persistence.dto;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.SequenceNames;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.TableColumnNames;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.TableNames;
+
+import javax.persistence.*;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -242,17 +232,8 @@ public class ConfigurationEntryDto implements DtoWithPrimaryKey<Long> {
         }
 
         public ConfigurationEntryDto build() {
-            return new ConfigurationEntryDto(id,
-                                             providerNid,
-                                             providerId,
-                                             providerVersion,
-                                             targetOrg,
-                                             targetSpace,
-                                             content,
-                                             visibility,
-                                             spaceId,
-                                             providerNamespace,
-                                             contentId);
+            return new ConfigurationEntryDto(id, providerNid, providerId, providerVersion, targetOrg, targetSpace, content, visibility,
+                                             spaceId, providerNamespace, contentId);
         }
 
     }

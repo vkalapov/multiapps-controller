@@ -1,31 +1,21 @@
 package org.cloudfoundry.multiapps.controller.persistence.dto;
 
-import static java.text.MessageFormat.format;
-
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlElement;
-
+import jakarta.xml.bind.annotation.XmlElement;
 import org.cloudfoundry.multiapps.controller.persistence.Messages;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.SequenceNames;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.TableColumnNames;
 import org.cloudfoundry.multiapps.controller.persistence.model.PersistenceMetadata.TableNames;
 
-@Table(name = TableNames.CONFIGURATION_SUBSCRIPTION_TABLE, uniqueConstraints = { @UniqueConstraint(columnNames = {
-    TableColumnNames.CONFIGURATION_SUBSCRIPTION_APP_NAME, TableColumnNames.CONFIGURATION_SUBSCRIPTION_MTA_ID,
-    TableColumnNames.CONFIGURATION_SUBSCRIPTION_SPACE_ID, TableColumnNames.CONFIGURATION_SUBSCRIPTION_RESOURCE_NAME }) })
+import javax.persistence.*;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static java.text.MessageFormat.format;
+
+@Table(name = TableNames.CONFIGURATION_SUBSCRIPTION_TABLE, uniqueConstraints = {
+    @UniqueConstraint(columnNames = { TableColumnNames.CONFIGURATION_SUBSCRIPTION_APP_NAME,
+        TableColumnNames.CONFIGURATION_SUBSCRIPTION_MTA_ID, TableColumnNames.CONFIGURATION_SUBSCRIPTION_SPACE_ID,
+        TableColumnNames.CONFIGURATION_SUBSCRIPTION_RESOURCE_NAME }) })
 @Entity
 @Access(AccessType.FIELD)
 @SequenceGenerator(name = SequenceNames.CONFIGURATION_SUBSCRIPTION_SEQUENCE, sequenceName = SequenceNames.CONFIGURATION_SUBSCRIPTION_SEQUENCE, allocationSize = 1)
@@ -165,11 +155,11 @@ public class ConfigurationSubscriptionDto implements DtoWithPrimaryKey<Long> {
     public String getResourceName() {
         return resourceName;
     }
-    
+
     public String getModuleId() {
         return moduleId;
     }
-    
+
     public String getResourceId() {
         return resourceId;
     }
@@ -242,15 +232,7 @@ public class ConfigurationSubscriptionDto implements DtoWithPrimaryKey<Long> {
         }
 
         public ConfigurationSubscriptionDto build() {
-            return new ConfigurationSubscriptionDto(id,
-                                                    mtaId,
-                                                    spaceId,
-                                                    appName,
-                                                    filter,
-                                                    module,
-                                                    resourceName,
-                                                    resourceProperties,
-                                                    moduleId,
+            return new ConfigurationSubscriptionDto(id, mtaId, spaceId, appName, filter, module, resourceName, resourceProperties, moduleId,
                                                     resourceId);
         }
     }

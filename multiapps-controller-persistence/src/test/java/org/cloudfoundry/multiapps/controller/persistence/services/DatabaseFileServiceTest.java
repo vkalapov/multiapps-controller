@@ -1,10 +1,16 @@
 package org.cloudfoundry.multiapps.controller.persistence.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import jakarta.xml.bind.DatatypeConverter;
+import org.cloudfoundry.multiapps.common.util.DigestHelper;
+import org.cloudfoundry.multiapps.controller.persistence.DataSourceWithDialect;
+import org.cloudfoundry.multiapps.controller.persistence.model.FileEntry;
+import org.cloudfoundry.multiapps.controller.persistence.model.ImmutableFileEntry;
+import org.cloudfoundry.multiapps.controller.persistence.test.TestDataSourceProvider;
+import org.cloudfoundry.multiapps.controller.persistence.util.JdbcUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,18 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.cloudfoundry.multiapps.common.util.DigestHelper;
-import org.cloudfoundry.multiapps.controller.persistence.DataSourceWithDialect;
-import org.cloudfoundry.multiapps.controller.persistence.model.FileEntry;
-import org.cloudfoundry.multiapps.controller.persistence.model.ImmutableFileEntry;
-import org.cloudfoundry.multiapps.controller.persistence.test.TestDataSourceProvider;
-import org.cloudfoundry.multiapps.controller.persistence.util.JdbcUtil;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseFileServiceTest {
 
@@ -82,9 +77,8 @@ class DatabaseFileServiceTest {
         // This should be considered during the migration
         // https://bugs.openjdk.org/browse/JDK-8242504
         assertEquals(fileEntry.getModified()
-                              .truncatedTo(ChronoUnit.MILLIS),
-                     fileEntryMetadata.getModified()
-                                      .truncatedTo(ChronoUnit.MILLIS));
+                              .truncatedTo(ChronoUnit.MILLIS), fileEntryMetadata.getModified()
+                                                                                .truncatedTo(ChronoUnit.MILLIS));
     }
 
     @Test
@@ -203,8 +197,7 @@ class DatabaseFileServiceTest {
                                                                     .name(fileName)
                                                                     .size(BigInteger.valueOf(PIC_SIZE))
                                                                     .operationId(operationId)
-                                                                    .build(),
-                                                  resourceStream);
+                                                                    .build(), resourceStream);
         verifyFileEntry(fileEntry, space, namespace);
         return fileEntry;
     }
@@ -251,8 +244,7 @@ class DatabaseFileServiceTest {
                                                      .namespace(NAMESPACE_1)
                                                      .name(PIC_STORAGE_NAME)
                                                      .size(BigInteger.valueOf(PIC_SIZE))
-                                                     .build(),
-                                   resourceStream);
+                                                     .build(), resourceStream);
     }
 
     private void validateFileContent(FileEntry storedFile, final String expectedFileChecksum) throws FileStorageException {

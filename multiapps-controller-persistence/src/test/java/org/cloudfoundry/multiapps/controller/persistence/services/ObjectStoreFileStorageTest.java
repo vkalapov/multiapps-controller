@@ -1,9 +1,17 @@
 package org.cloudfoundry.multiapps.controller.persistence.services;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import jakarta.xml.bind.DatatypeConverter;
+import org.cloudfoundry.multiapps.common.util.DigestHelper;
+import org.cloudfoundry.multiapps.controller.persistence.model.FileEntry;
+import org.cloudfoundry.multiapps.controller.persistence.model.ImmutableFileEntry;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.domain.Blob;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,19 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.cloudfoundry.multiapps.common.util.DigestHelper;
-import org.cloudfoundry.multiapps.controller.persistence.model.FileEntry;
-import org.cloudfoundry.multiapps.controller.persistence.model.ImmutableFileEntry;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ObjectStoreFileStorageTest {
 
@@ -150,8 +146,8 @@ class ObjectStoreFileStorageTest {
 
         String blobWithNoMetadataId = addBlobWithNoMetadata();
 
-        int deletedFiles = fileStorage.deleteFilesModifiedBefore(LocalDateTime.ofInstant(Instant.ofEpochMilli(currentMillis - oldFilesTtl),
-                                                                                         ZoneId.systemDefault()));
+        int deletedFiles = fileStorage.deleteFilesModifiedBefore(
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(currentMillis - oldFilesTtl), ZoneId.systemDefault()));
 
         assertEquals(3, deletedFiles);
         assertFileExists(true, fileEntryToRemain1);

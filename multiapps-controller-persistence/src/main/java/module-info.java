@@ -36,7 +36,7 @@ open module org.cloudfoundry.multiapps.controller.persistence {
     requires flowable.engine;
     requires flowable.engine.common.api;
     requires flowable.variable.service.api;
-    requires java.xml.bind;
+    requires jakarta.xml.bind;
     requires jakarta.inject;
     requires javax.inject;
     requires org.apache.logging.log4j;
