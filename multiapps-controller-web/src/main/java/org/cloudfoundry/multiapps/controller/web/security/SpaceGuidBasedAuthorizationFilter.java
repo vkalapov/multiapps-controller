@@ -41,7 +41,7 @@ public abstract class SpaceGuidBasedAuthorizationFilter extends AbstractUriAutho
             loginAttemptAuditLog.logLoginAttempt(SecurityContextUtil.getUsername(), spaceGuid,
                                                  Messages.USER_FAILED_TO_LOG_IN_AUDIT_LOG_MESSAGE, Messages.LOGIN_ATTEMPT_AUDIT_LOG_CONFIG);
             logUnauthorizedRequest(request, e);
-            response.sendError(e.getStatus()
+            response.sendError(e.getStatusCode()
                                 .value(), MessageFormat.format(Messages.NOT_AUTHORIZED_TO_OPERATE_IN_SPACE_WITH_GUID_0, spaceGuid));
             return false;
         }

@@ -41,7 +41,8 @@ public class CFExceptionMapper {
         }
         if (e instanceof ResponseStatusException) {
             ResponseStatusException rse = (ResponseStatusException) e;
-            status = rse.getStatus();
+            status = HttpStatus.valueOf(rse.getStatusCode()
+                                           .value());
             message = rse.getReason();
         }
         if (e instanceof SQLException || e instanceof PersistenceException) {

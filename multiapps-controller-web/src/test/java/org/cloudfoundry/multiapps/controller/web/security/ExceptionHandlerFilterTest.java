@@ -1,15 +1,9 @@
 package org.cloudfoundry.multiapps.controller.web.security;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -19,6 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class ExceptionHandlerFilterTest {
 
@@ -47,7 +46,7 @@ class ExceptionHandlerFilterTest {
     @Test
     void testDoInternalFilterThrowingResponseStatusException() throws IOException, ServletException {
         ResponseStatusException responseStatusException = Mockito.mock(ResponseStatusException.class);
-        Mockito.when(responseStatusException.getStatus())
+        Mockito.when(responseStatusException.getStatusCode())
                .thenReturn(HttpStatus.UNAUTHORIZED);
         Mockito.when(responseStatusException.getMessage())
                .thenReturn("Error");
@@ -75,7 +74,8 @@ class ExceptionHandlerFilterTest {
 
     @Test
     void testInternalAuthenticationServiceExceptionException() throws IOException, ServletException {
-        InternalAuthenticationServiceException internalAuthenticationServiceException = Mockito.mock(InternalAuthenticationServiceException.class);
+        InternalAuthenticationServiceException internalAuthenticationServiceException = Mockito.mock(
+            InternalAuthenticationServiceException.class);
         Mockito.doThrow(internalAuthenticationServiceException)
                .when(filterChain)
                .doFilter(request, response);

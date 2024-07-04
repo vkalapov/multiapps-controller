@@ -27,7 +27,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (ResponseStatusException e) {
             LOGGER.error(e.getMessage(), e);
-            response.setStatus(e.getStatus()
+            response.setStatus(e.getStatusCode()
                                 .value());
             response.getWriter()
                     .write(e.getMessage());
