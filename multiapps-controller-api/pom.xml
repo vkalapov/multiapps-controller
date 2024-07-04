@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>multiapps-controller-api</artifactId>
@@ -70,7 +70,7 @@
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
                 <configuration>
-                    <skipSwaggerGeneration>false</skipSwaggerGeneration>
+                    <skipSwaggerGeneration>true</skipSwaggerGeneration>
                     <apiSources>
                         <apiSource>
                             <springmvc>true</springmvc>
@@ -108,7 +108,8 @@
                                     <swaggerFileName>mtarest</swaggerFileName>
                                     <info>
                                         <title>MTA REST API</title>
-                                        <description>This is the API of the Cloud Foundry MultiApps Controller</description>
+                                        <description>This is the API of the Cloud Foundry MultiApps Controller
+                                        </description>
                                         <version>1.4.0</version>
                                     </info>
                                 </apiSource>
@@ -128,7 +129,8 @@
                                     <swaggerFileName>mtarest_v2</swaggerFileName>
                                     <info>
                                         <title>MTA REST API</title>
-                                        <description>This is the API v2 of the Cloud Foundry MultiApps Controller</description>
+                                        <description>This is the API v2 of the Cloud Foundry MultiApps Controller
+                                        </description>
                                         <version>2.0.0</version>
                                     </info>
                                 </apiSource>
