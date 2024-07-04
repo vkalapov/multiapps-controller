@@ -7,7 +7,7 @@ import org.cloudfoundry.multiapps.controller.core.Constants;
 import org.cloudfoundry.multiapps.controller.web.util.ServletUtil;
 import org.slf4j.MDC;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.UUID;
 
 @Named

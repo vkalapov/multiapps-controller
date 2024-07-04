@@ -51,7 +51,6 @@ open module org.cloudfoundry.multiapps.controller.core {
     requires com.fasterxml.jackson.databind;
     requires com.google.common;
     requires java.sql;
-    requires javax.inject;
     requires liquibase.core;
     requires org.apache.logging.log4j;
     requires org.apache.logging.log4j.core;
@@ -79,5 +78,6 @@ open module org.cloudfoundry.multiapps.controller.core {
     requires static java.compiler;
     requires static org.immutables.value;
     requires spring.security.oauth2.client;
+    requires jakarta.inject;
 
 }

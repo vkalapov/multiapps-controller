@@ -10,7 +10,7 @@ import org.cloudfoundry.multiapps.controller.web.util.ServletUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.IOException;
 
 @Named("requestSizeFilter")

@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 

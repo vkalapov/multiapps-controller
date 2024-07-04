@@ -8,8 +8,8 @@ import org.cloudfoundry.multiapps.controller.persistence.model.CloudTarget;
 import org.cloudfoundry.multiapps.controller.web.Messages;
 import org.cloudfoundry.multiapps.controller.web.resources.ConfigurationEntriesResource;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class PurgeApiAuthorizationFilter extends SpaceNameBasedAuthorizationFilter {

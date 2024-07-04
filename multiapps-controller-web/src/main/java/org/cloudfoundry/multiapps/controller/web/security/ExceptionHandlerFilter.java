@@ -12,7 +12,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.IOException;
 
 @Named

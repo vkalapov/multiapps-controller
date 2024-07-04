@@ -10,8 +10,8 @@ import org.cloudfoundry.multiapps.controller.web.util.RateLimiterProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 

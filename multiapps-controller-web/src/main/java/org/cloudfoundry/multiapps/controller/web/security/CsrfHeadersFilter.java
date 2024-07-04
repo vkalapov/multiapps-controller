@@ -8,7 +8,7 @@ import org.cloudfoundry.multiapps.controller.web.Constants;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.IOException;
 
 /**

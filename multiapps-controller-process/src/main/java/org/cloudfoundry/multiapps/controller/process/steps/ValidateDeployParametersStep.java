@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.cloudfoundry.multiapps.common.SLException;
 import org.cloudfoundry.multiapps.controller.client.util.ResilientOperationExecutor;
