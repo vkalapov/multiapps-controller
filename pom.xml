@@ -50,7 +50,7 @@
         <aliyun-sdk-oss.version>3.17.4</aliyun-sdk-oss.version>
         <auto-service.version>1.1.1</auto-service.version>
         <commons-codec.version>1.16.1</commons-codec.version>
-        <multiapps.version>2.21.0</multiapps.version>
+        <multiapps.version>2.22.0-SNAPSHOT</multiapps.version>
         <java-cfenv.version>3.1.5</java-cfenv.version>
         <jaxb-api.version>4.0.0</jaxb-api.version>
         <jaxb-core.version>2.3.0.1</jaxb-core.version>
@@ -330,11 +330,22 @@
                 <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>${jaxb-api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>4.0.5</version>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-core -->
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-core</artifactId>
                 <version>${jaxb-core.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/jakarta.ws.rs/jakarta.ws.rs-api -->
+            <dependency>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>4.0.0</version>
             </dependency>
             <!-- If this is not included build fails with  'java.xml.bind not found,required by org.cloudfoundry.multiapps.common'-->
             <dependency>
@@ -347,11 +358,6 @@
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
                 <version>4.0.5</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>${jaxb-impl.version}</version>
             </dependency>
             <!-- Transitive dependency from multiapps-common and liquibase. Pin the version to make sure we're always using 
                 the correct one. -->
