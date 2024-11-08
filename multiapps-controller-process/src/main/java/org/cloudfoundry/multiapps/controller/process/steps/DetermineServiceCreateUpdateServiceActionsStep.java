@@ -1,17 +1,11 @@
 package org.cloudfoundry.multiapps.controller.process.steps;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
+import com.sap.cloudfoundry.client.facade.CloudControllerClient;
+import com.sap.cloudfoundry.client.facade.CloudOperationException;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceInstance;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceKey;
+import com.sap.cloudfoundry.client.facade.domain.ServiceOperation;
 import jakarta.inject.Named;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,23 +23,27 @@ import org.cloudfoundry.multiapps.controller.process.Messages;
 import org.cloudfoundry.multiapps.controller.process.util.DynamicResolvableParametersContextUpdater;
 import org.cloudfoundry.multiapps.controller.process.util.ServiceAction;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
-import org.cloudfoundry.multiapps.mta.handlers.ArchiveHandler;
 import org.cloudfoundry.multiapps.mta.util.PropertiesUtil;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 
-import com.sap.cloudfoundry.client.facade.CloudControllerClient;
-import com.sap.cloudfoundry.client.facade.CloudOperationException;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceInstance;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceKey;
-import com.sap.cloudfoundry.client.facade.domain.ServiceOperation;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Named("determineServiceCreateUpdateActionsStep")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowableStep {
 
+    private ProcessContext context;
+
     @Override
     protected StepPhase executeStep(ProcessContext context) throws Exception {
+        this.context = context;
         CloudControllerClient client = context.getControllerClient();
         CloudServiceInstanceExtended serviceToProcess = context.getVariable(Variables.SERVICE_TO_PROCESS);
         getStepLogger().info(Messages.PROCESSING_SERVICE, serviceToProcess.getName());
@@ -64,9 +62,8 @@ public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowable
 
     @Override
     protected String getStepErrorMessage(ProcessContext context) {
-        return MessageFormat.format(Messages.ERROR_DETERMINING_ACTIONS_TO_EXECUTE_ON_SERVICE,
-                                    context.getVariable(Variables.SERVICE_TO_PROCESS)
-                                           .getName());
+        return MessageFormat.format(Messages.ERROR_DETERMINING_ACTIONS_TO_EXECUTE_ON_SERVICE, context.getVariable(Variables.SERVICE_TO_PROCESS)
+                                                                                                     .getName());
     }
 
     private List<ServiceAction> determineActionsAndHandleExceptions(ProcessContext context, CloudServiceInstance existingService) {
@@ -74,8 +71,7 @@ public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowable
         try {
             return determineActions(context, service, existingService);
         } catch (CloudOperationException e) {
-            String determineServiceActionsFailedMessage = MessageFormat.format(Messages.ERROR_DETERMINING_ACTIONS_TO_EXECUTE_ON_SERVICE,
-                                                                               service.getName(), e.getStatusText());
+            String determineServiceActionsFailedMessage = MessageFormat.format(Messages.ERROR_DETERMINING_ACTIONS_TO_EXECUTE_ON_SERVICE, service.getName(), e.getStatusText());
             throw new CloudOperationException(e.getStatusCode(), determineServiceActionsFailedMessage, e.getDescription(), e);
         }
     }
@@ -169,11 +165,7 @@ public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowable
     }
 
     private SLException getServiceRecreationNeededException(CloudServiceInstanceExtended service, CloudServiceInstance existingService) {
-        return new SLException(Messages.ERROR_SERVICE_NEEDS_TO_BE_RECREATED_BUT_FLAG_NOT_SET,
-                               service.getResourceName(),
-                               buildServiceType(service),
-                               existingService.getName(),
-                               buildServiceType(existingService));
+        return new SLException(Messages.ERROR_SERVICE_NEEDS_TO_BE_RECREATED_BUT_FLAG_NOT_SET, service.getResourceName(), buildServiceType(service), existingService.getName(), buildServiceType(existingService));
     }
 
     private String buildServiceType(CloudServiceInstance service) {
@@ -195,34 +187,21 @@ public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowable
         return newMetadata != null;
     }
 
-    private CloudServiceInstanceExtended prepareServiceParameters(ProcessContext context, CloudServiceInstanceExtended service)
-        throws FileStorageException {
+    private CloudServiceInstanceExtended prepareServiceParameters(ProcessContext context, CloudServiceInstanceExtended service) {
         MtaArchiveElements mtaArchiveElements = context.getVariable(Variables.MTA_ARCHIVE_ELEMENTS);
         String fileName = mtaArchiveElements.getResourceFileName(service.getResourceName());
         if (fileName != null) {
             getStepLogger().info(Messages.SETTING_SERVICE_PARAMETERS, service.getName(), fileName);
-            return setServiceParameters(context, service, fileName);
+            return mergeCredentials(service);
         }
         return service;
     }
 
-    private CloudServiceInstanceExtended setServiceParameters(ProcessContext context, CloudServiceInstanceExtended service, String fileName)
-        throws FileStorageException {
-        String appArchiveId = context.getRequiredVariable(Variables.APP_ARCHIVE_ID);
-        String spaceGuid = context.getVariable(Variables.SPACE_GUID);
-        return fileService.processFileContent(spaceGuid, appArchiveId, appArchiveStream -> {
-            try (InputStream is = ArchiveHandler.getInputStream(appArchiveStream, fileName, configuration.getMaxManifestSize())) {
-                return mergeCredentials(service, is);
-            } catch (IOException e) {
-                throw new SLException(e, Messages.ERROR_RETRIEVING_MTA_RESOURCE_CONTENT, fileName);
-            }
-        });
-    }
-
-    private CloudServiceInstanceExtended mergeCredentials(CloudServiceInstanceExtended service, InputStream credentialsJson) {
+    private CloudServiceInstanceExtended mergeCredentials(CloudServiceInstanceExtended service) {
         Map<String, Object> existingCredentials = ObjectUtils.defaultIfNull(service.getCredentials(), Collections.emptyMap());
-        Map<String, Object> credentials = JsonUtil.convertJsonToMap(credentialsJson);
-        Map<String, Object> result = PropertiesUtil.mergeExtensionProperties(credentials, existingCredentials);
+        Map<String, Object> credentialsFromFiles = JsonUtil.convertJsonToMap((String) context.getVariable(Variables.MTA_ARCHIVE_RESOURCE_JSONS)
+                                                                                             .get(service.getResourceName()));
+        Map<String, Object> result = PropertiesUtil.mergeExtensionProperties(credentialsFromFiles, existingCredentials);
         return ImmutableCloudServiceInstanceExtended.copyOf(service)
                                                     .withCredentials(result);
     }

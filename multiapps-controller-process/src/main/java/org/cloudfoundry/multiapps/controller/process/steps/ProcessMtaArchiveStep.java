@@ -1,12 +1,6 @@
 package org.cloudfoundry.multiapps.controller.process.steps;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.jar.Manifest;
-
 import jakarta.inject.Inject;
-
 import org.cloudfoundry.multiapps.controller.core.helpers.DescriptorParserFacadeFactory;
 import org.cloudfoundry.multiapps.controller.core.helpers.MtaArchiveElements;
 import org.cloudfoundry.multiapps.controller.core.helpers.MtaArchiveHelper;
@@ -19,6 +13,15 @@ import org.cloudfoundry.multiapps.mta.handlers.ArchiveHandler;
 import org.cloudfoundry.multiapps.mta.handlers.DescriptorParserFacade;
 import org.cloudfoundry.multiapps.mta.model.DeploymentDescriptor;
 
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+
 public class ProcessMtaArchiveStep extends SyncFlowableStep {
 
     @Inject
@@ -26,6 +29,7 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
     @Inject
     protected DescriptorParserFacadeFactory descriptorParserFactory;
 
+    private Manifest manifest;
     protected Function<OperationService, ProcessConflictPreventer> conflictPreventerSupplier = ProcessConflictPreventer::new;
 
     @Override
@@ -42,6 +46,42 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
         return StepPhase.DONE;
     }
 
+    private void resolveJsonEntries(InputStream appArchiveStream, ProcessContext context) {
+        Map<String, Attributes> jsonEntries = getJsonEntries();
+        Map<String, Object> resolvedModules = getContentByElementType(appArchiveStream, jsonEntries, "MTA-Requires");
+        Map<String, Object> resolvedResources = getContentByElementType(appArchiveStream, jsonEntries, "MTA-Resources");
+
+        context.setVariable(Variables.MTA_ARCHIVE_JSONS, resolvedModules);
+        context.setVariable(Variables.MTA_ARCHIVE_RESOURCE_JSONS, resolvedResources);
+    }
+
+    private Map<String, Attributes> getJsonEntries() {
+        return manifest.getEntries()
+                       .entrySet()
+                       .stream()
+                       .filter(entry -> entry.getValue()
+                                             .containsValue("application/json"))
+                       .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private Map<String, Object> getContentByElementType(InputStream appArchiveStream, Map<String, Attributes> filteredMap,
+                                                        String elementType) {
+        Map<String, Object> resolvedElements = new HashMap<String, Object>();
+        for (var entry : filteredMap.entrySet()) {
+            String elementName = entry.getValue()
+                                      .getValue(elementType);
+            if (elementName != null) {
+                resolvedElements.put(elementName, getFileContent(appArchiveStream, entry));
+            }
+        }
+        return resolvedElements;
+    }
+
+    private String getFileContent(InputStream appArchiveStream, Map.Entry<String, Attributes> entry) {
+        return new String(ArchiveHandler.getFileContent(appArchiveStream, entry.getKey(), configuration.getMaxResourceFileSize()));
+
+    }
+
     @Override
     protected String getStepErrorMessage(ProcessContext context) {
         return Messages.ERROR_PROCESSING_MTA_ARCHIVE;
@@ -54,11 +94,18 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
 
         MtaArchiveHelper helper = fileService.processFileContent(context.getVariable(Variables.SPACE_GUID), appArchiveId,
                                                                  this::createMtaArchiveHelperFromManifest);
+
+        fileService.processFileContent(context.getVariable(Variables.SPACE_GUID), appArchiveId, input -> {
+            resolveJsonEntries(input, context);
+            return input;
+        });
+
         MtaArchiveElements mtaArchiveElements = new MtaArchiveElements();
         addMtaArchiveModulesInMtaArchiveElements(context, helper, mtaArchiveElements);
         addMtaRequiredDependenciesInMtaArchiveElements(helper, mtaArchiveElements);
         addMtaArchiveResourcesInMtaArchiveElements(helper, mtaArchiveElements);
         context.setVariable(Variables.MTA_ARCHIVE_ELEMENTS, mtaArchiveElements);
+
     }
 
     private DeploymentDescriptor extractDeploymentDescriptor(InputStream appArchiveStream) {
@@ -70,6 +117,7 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
 
     private MtaArchiveHelper createMtaArchiveHelperFromManifest(InputStream appArchiveStream) {
         Manifest manifest = ArchiveHandler.getManifest(appArchiveStream, configuration.getMaxManifestSize());
+        this.manifest = manifest;
         MtaArchiveHelper helper = getHelper(manifest);
         helper.init();
         return helper;

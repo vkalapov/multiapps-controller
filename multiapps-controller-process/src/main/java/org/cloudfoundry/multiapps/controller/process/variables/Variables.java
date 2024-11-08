@@ -1,15 +1,14 @@
 package org.cloudfoundry.multiapps.controller.process.variables;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.sap.cloudfoundry.client.facade.domain.CloudApplication;
+import com.sap.cloudfoundry.client.facade.domain.CloudPackage;
+import com.sap.cloudfoundry.client.facade.domain.CloudRoute;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceBinding;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceBroker;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceKey;
+import com.sap.cloudfoundry.client.facade.domain.CloudTask;
+import com.sap.cloudfoundry.client.facade.domain.ServiceOperation;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudApplicationExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudServiceInstanceExtended;
 import org.cloudfoundry.multiapps.controller.core.cf.DeploymentMode;
@@ -36,15 +35,15 @@ import org.cloudfoundry.multiapps.mta.model.Hook;
 import org.cloudfoundry.multiapps.mta.model.Module;
 import org.cloudfoundry.multiapps.mta.model.VersionRule;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.sap.cloudfoundry.client.facade.domain.CloudApplication;
-import com.sap.cloudfoundry.client.facade.domain.CloudPackage;
-import com.sap.cloudfoundry.client.facade.domain.CloudRoute;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceBinding;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceBroker;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceKey;
-import com.sap.cloudfoundry.client.facade.domain.CloudTask;
-import com.sap.cloudfoundry.client.facade.domain.ServiceOperation;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public interface Variables {
 
@@ -324,6 +323,18 @@ public interface Variables {
                                                                                    .type(Variable.typeReference(MtaArchiveElements.class))
                                                                                    .defaultValue(new MtaArchiveElements())
                                                                                    .build();
+
+    Variable<Map<String, Object>> MTA_ARCHIVE_JSONS = ImmutableJsonStringVariable.<Map<String, Object>> builder()
+                                                                                 .name("mtaArchiveJsons")
+                                                                                 .type(new TypeReference<>() {
+                                                                                 })
+                                                                                 .build();
+
+    Variable<Map<String, Object>> MTA_ARCHIVE_RESOURCE_JSONS = ImmutableJsonStringVariable.<Map<String, Object>> builder()
+                                                                                          .name("mtaArchiveResourceJsons")
+                                                                                          .type(new TypeReference<>() {
+                                                                                          })
+                                                                                          .build();
     Variable<CloudServiceInstanceExtended> SERVICE_TO_PROCESS = ImmutableJsonStringVariable.<CloudServiceInstanceExtended> builder()
                                                                                            .name("serviceToProcess")
                                                                                            .type(Variable.typeReference(CloudServiceInstanceExtended.class))
@@ -785,8 +796,7 @@ public interface Variables {
     Variable<LocalDateTime> LOGS_OFFSET_FOR_APP_EXECUTION = ImmutableJsonStringVariable.<LocalDateTime> builder()
                                                                                        .name("logsOffsetForAppExecution")
                                                                                        .type(Variable.typeReference(LocalDateTime.class))
-                                                                                       .defaultValue(LocalDateTime.ofInstant(Instant.EPOCH,
-                                                                                                                             ZoneId.of("UTC")))
+                                                                                       .defaultValue(LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC")))
                                                                                        .build();
     // we need to use a Json string serialization because the nanosecond precision is being lost when using SimpleVariable
     Variable<LocalDateTime> LOGS_OFFSET = ImmutableJsonStringVariable.<LocalDateTime> builder()

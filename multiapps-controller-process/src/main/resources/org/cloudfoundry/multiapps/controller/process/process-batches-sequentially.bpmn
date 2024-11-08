@@ -34,6 +34,7 @@
         <flowable:in source="completeMtaDeploymentDescriptor" target="completeMtaDeploymentDescriptor"></flowable:in>
         <flowable:in source="dynamicResolvableParameters" target="dynamicResolvableParameters"></flowable:in>
         <flowable:in source="ctsCurrentFileInfo" target="ctsCurrentFileInfo"></flowable:in>
+        <flowable:in source="mtaArchiveResourceJsons" target="mtaArchiveResourceJsons"></flowable:in>
       </extensionElements>
       <multiInstanceLoopCharacteristics isSequential="false" flowable:collection="servicesToCreate" flowable:elementVariable="serviceToProcess">
         <extensionElements></extensionElements>

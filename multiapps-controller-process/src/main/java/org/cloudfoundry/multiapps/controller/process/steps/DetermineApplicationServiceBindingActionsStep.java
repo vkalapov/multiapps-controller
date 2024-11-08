@@ -1,30 +1,27 @@
 package org.cloudfoundry.multiapps.controller.process.steps;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
+import com.sap.cloudfoundry.client.facade.CloudControllerClient;
+import com.sap.cloudfoundry.client.facade.CloudCredentials;
+import com.sap.cloudfoundry.client.facade.domain.CloudApplication;
+import com.sap.cloudfoundry.client.facade.domain.CloudServiceBinding;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudApplicationExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudApplicationExtended.AttributeUpdateStrategy;
 import org.cloudfoundry.multiapps.controller.core.cf.clients.AppBoundServiceInstanceNamesGetter;
 import org.cloudfoundry.multiapps.controller.core.cf.clients.WebClientFactory;
 import org.cloudfoundry.multiapps.controller.core.security.token.TokenService;
-import org.cloudfoundry.multiapps.controller.persistence.services.FileStorageException;
 import org.cloudfoundry.multiapps.controller.process.Messages;
 import org.cloudfoundry.multiapps.controller.process.util.ServiceBindingParametersGetter;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 
-import com.sap.cloudfoundry.client.facade.CloudControllerClient;
-import com.sap.cloudfoundry.client.facade.CloudCredentials;
-import com.sap.cloudfoundry.client.facade.domain.CloudApplication;
-import com.sap.cloudfoundry.client.facade.domain.CloudServiceBinding;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Named("determineApplicationServiceBindingActionsStep")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
@@ -36,17 +33,19 @@ public class DetermineApplicationServiceBindingActionsStep extends SyncFlowableS
     private WebClientFactory webClientFactory;
 
     @Override
-    protected StepPhase executeStep(ProcessContext context) throws FileStorageException {
+    protected StepPhase executeStep(ProcessContext context) {
         CloudControllerClient client = context.getControllerClient();
         CloudServiceBinding serviceBindingToDelete = context.getVariable(Variables.SERVICE_BINDING_TO_DELETE);
         CloudApplicationExtended appToProcess = context.getVariable(Variables.APP_TO_PROCESS);
         if (serviceBindingToDelete != null) {
-            String appName = appToProcess != null ? appToProcess.getName()
+            String appName = appToProcess != null
+                ? appToProcess.getName()
                 : client.getApplicationName(serviceBindingToDelete.getApplicationGuid());
             String serviceInstanceName = getServiceInstanceToUnbind(context, client, serviceBindingToDelete);
             getStepLogger().debug(Messages.WILL_UNBIND_SERVICE_INSTANCE_0_FROM_APP_1, serviceInstanceName, appName);
             return setBindingForDeletion(context, appName, serviceInstanceName);
         }
+
         String serviceInstanceToUnbindBind = context.getVariable(Variables.SERVICE_TO_UNBIND_BIND);
         getStepLogger().debug(Messages.DETERMINE_BIND_UNBIND_OPERATIONS_APPLICATION_0_SERVICE_INSTANCE_1, appToProcess.getName(),
                               serviceInstanceToUnbindBind);
@@ -79,8 +78,8 @@ public class DetermineApplicationServiceBindingActionsStep extends SyncFlowableS
             return keepExistingServiceBindings(context, appToProcess, serviceInstanceToUnbindBind);
         }
 
-        if (shouldRecreateServiceBinding(context)
-            || areBindingParametersDifferent(serviceBindingParametersGetter, existingApp, serviceInstanceToUnbindBind, bindingParameters)) {
+        if (shouldRecreateServiceBinding(context) || areBindingParametersDifferent(serviceBindingParametersGetter, existingApp,
+                                                                                   serviceInstanceToUnbindBind, bindingParameters)) {
             context.setVariable(Variables.SHOULD_UNBIND_SERVICE_FROM_APP, true);
             context.setVariable(Variables.SHOULD_BIND_SERVICE_TO_APP, true);
             context.setVariable(Variables.SERVICE_BINDING_PARAMETERS, bindingParameters);
@@ -130,7 +129,7 @@ public class DetermineApplicationServiceBindingActionsStep extends SyncFlowableS
     }
 
     protected ServiceBindingParametersGetter getServiceBindingParametersGetter(ProcessContext context) {
-        return new ServiceBindingParametersGetter(context, fileService, configuration.getMaxManifestSize());
+        return new ServiceBindingParametersGetter(context, configuration.getMaxManifestSize());
     }
 
     protected AppBoundServiceInstanceNamesGetter getAppServicesGetter(CloudCredentials credentials, String correlationId) {
@@ -163,13 +162,13 @@ public class DetermineApplicationServiceBindingActionsStep extends SyncFlowableS
     protected String getStepErrorMessage(ProcessContext context) {
         CloudServiceBinding serviceBindingToDelete = context.getVariable(Variables.SERVICE_BINDING_TO_DELETE);
         if (serviceBindingToDelete != null) {
-            return MessageFormat.format(Messages.ERROR_WHILE_DETERMINING_BIND_UNBIND_OPERATIONS_OF_APPLICATION_GUID_TO_SERVICE_INSTANCE_GUID,
-                                        serviceBindingToDelete.getApplicationGuid(), serviceBindingToDelete.getServiceInstanceGuid());
+            return MessageFormat.format(
+                Messages.ERROR_WHILE_DETERMINING_BIND_UNBIND_OPERATIONS_OF_APPLICATION_GUID_TO_SERVICE_INSTANCE_GUID,
+                serviceBindingToDelete.getApplicationGuid(), serviceBindingToDelete.getServiceInstanceGuid());
         }
         return MessageFormat.format(Messages.ERROR_WHILE_DETERMINING_BIND_UNBIND_OPERATIONS_OF_APPLICATION_TO_SERVICE,
                                     context.getVariable(Variables.APP_TO_PROCESS)
-                                           .getName(),
-                                    context.getVariable(Variables.SERVICE_TO_UNBIND_BIND));
+                                           .getName(), context.getVariable(Variables.SERVICE_TO_UNBIND_BIND));
     }
 
 }
