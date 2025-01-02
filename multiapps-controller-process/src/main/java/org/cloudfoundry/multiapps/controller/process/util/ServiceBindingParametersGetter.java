@@ -8,10 +8,12 @@ import org.cloudfoundry.multiapps.common.SLException;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.BindingDetails;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudApplicationExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudServiceInstanceExtended;
+import org.cloudfoundry.multiapps.controller.core.Constants;
 import org.cloudfoundry.multiapps.controller.core.security.serialization.SecureSerialization;
 import org.cloudfoundry.multiapps.controller.process.Messages;
 import org.cloudfoundry.multiapps.controller.process.steps.ProcessContext;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
+import org.cloudfoundry.multiapps.mta.util.PropertiesUtil;
 import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
@@ -35,9 +37,11 @@ public class ServiceBindingParametersGetter {
         }
 
         Map<String, Object> descriptorProvidedBindingParameters = getDescriptorProvidedBindingParameters(app, service.get());
+        Map<String, Object> fileProvidedBindingParameters = getFileProvidedBindingParameters(app, service.get());
+        Map<String, Object> bindingParameters = PropertiesUtil.mergeExtensionProperties(fileProvidedBindingParameters, descriptorProvidedBindingParameters);
         context.getStepLogger()
-               .debug(Messages.BINDING_PARAMETERS_FOR_APPLICATION, app.getName(), SecureSerialization.toJson(descriptorProvidedBindingParameters));
-        return descriptorProvidedBindingParameters;
+               .error(Messages.BINDING_PARAMETERS_FOR_APPLICATION, app.getName(), SecureSerialization.toJson(bindingParameters));
+        return bindingParameters;
     }
 
     private Optional<CloudServiceInstanceExtended> getService(List<CloudServiceInstanceExtended> services, String serviceName) {
@@ -55,6 +59,34 @@ public class ServiceBindingParametersGetter {
     private BindingDetails getDescriptorProvidedBindingParametersAndBindingName(CloudApplicationExtended app, CloudServiceInstanceExtended service) {
         return app.getBindingParameters()
                   .get(service.getResourceName());
+    }
+
+    private Map<String, Object> getFileProvidedBindingParameters(CloudApplicationExtended app, CloudServiceInstanceExtended service) {
+        Map<String, String> requiresConfigurationFiles = context.getVariable(Variables.EXTERNAL_CONFIGURATION_REQUIRES_DEPENDENCY);
+        for (Map.Entry<String, String> entry : requiresConfigurationFiles.entrySet()) {
+            if (hasParametersFromFile(entry, app, service)) {
+                Map<String, Object> resolvedFilesForDependency = getExternalFileForEntry(entry);
+                if (resolvedFilesForDependency != null) {
+                    return resolvedFilesForDependency;
+                }
+            }
+
+        }
+        return Collections.emptyMap();
+    }
+
+    private boolean hasParametersFromFile(Map.Entry<String, String> entry, CloudApplicationExtended app, CloudServiceInstanceExtended service) {
+        String requiresPath = entry.getKey();
+        String[] splitEntry = requiresPath.split(Constants.MTA_ELEMENT_SEPARATOR);
+        String requiresDependencyModuleName = splitEntry[0];
+        String requiresDependencyName = splitEntry[1];
+        return app.getName()
+                  .equals(requiresDependencyModuleName) && requiresDependencyName.equals(service.getResourceName());
+    }
+
+    private Map<String, Object> getExternalFileForEntry(Map.Entry<String, String> entry) {
+        return (Map<String, Object>) context.getVariable(Variables.RESOLVED_EXTERNAL_FILES)
+                                            .get(entry.getValue());
     }
 
     public String getDescriptorProvidedBindingName(CloudApplicationExtended app, String serviceName) {

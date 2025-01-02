@@ -13,7 +13,6 @@ import org.cloudfoundry.multiapps.controller.client.lib.domain.ImmutableCloudSer
 import org.cloudfoundry.multiapps.controller.core.model.DynamicResolvableParameter;
 import org.cloudfoundry.multiapps.controller.core.model.ImmutableDynamicResolvableParameter;
 import org.cloudfoundry.multiapps.controller.process.Messages;
-import org.cloudfoundry.multiapps.controller.process.util.ArchiveEntryExtractor;
 import org.cloudfoundry.multiapps.controller.process.util.ServiceAction;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class DetermineServiceCreateUpdateServiceActionsStepTest extends SyncFlowableSte
 
     private static final String SERVICE_NAME = "service";
 
-    private ArchiveEntryExtractor archiveEntryExtractor;
+    private static final String FILENAME = "fileName";
 
     public static Stream<Arguments> testExecute() {
         return Stream.of(
@@ -228,6 +227,34 @@ class DetermineServiceCreateUpdateServiceActionsStepTest extends SyncFlowableSte
         assertEquals(expectedResolvedParameter, context.getVariable(Variables.DYNAMIC_RESOLVABLE_PARAMETER));
     }
 
+    @Test
+    void testFileServiceCreationParameters() {
+        var service = createMockServiceInstance(false);
+        context.setVariable(Variables.SERVICE_TO_PROCESS, service);
+        context.setVariable(Variables.SERVICE_KEYS_TO_CREATE, Map.of());
+        context.setVariable(Variables.RESOLVED_EXTERNAL_FILES, Map.of(FILENAME, Map.of("CredentialKey", "CredentialValue")));
+        context.setVariable(Variables.EXTERNAL_CONFIGURATION_RESOURCES, Map.of(SERVICE_NAME, FILENAME));
+        step.execute(execution);
+
+        assertStepFinishedSuccessfully();
+        assertEquals(Map.of("CredentialKey", "CredentialValue", "key", "val"), context.getVariable(Variables.SERVICE_TO_PROCESS)
+                                                                                      .getCredentials());
+    }
+
+    @Test
+    void testFileServiceCreationParametersShouldNotOverride() {
+        var service = createMockServiceInstance(false);
+        context.setVariable(Variables.SERVICE_TO_PROCESS, service);
+        context.setVariable(Variables.SERVICE_KEYS_TO_CREATE, Map.of());
+        context.setVariable(Variables.RESOLVED_EXTERNAL_FILES, Map.of(FILENAME, Map.of("key", "shouldNotOverride")));
+        context.setVariable(Variables.EXTERNAL_CONFIGURATION_RESOURCES, Map.of(SERVICE_NAME, FILENAME));
+        step.execute(execution);
+
+        assertStepFinishedSuccessfully();
+        assertEquals(Map.of("key", "val"), context.getVariable(Variables.SERVICE_TO_PROCESS)
+                                                  .getCredentials());
+    }
+
     private void initializeParameters(StepInput input, Set<DynamicResolvableParameter> dynamicResolvableParameters) {
         prepareContext(input, dynamicResolvableParameters);
         prepareClient(input);
@@ -317,7 +344,6 @@ class DetermineServiceCreateUpdateServiceActionsStepTest extends SyncFlowableSte
 
     @Override
     protected DetermineServiceCreateUpdateServiceActionsStep createStep() {
-        archiveEntryExtractor = Mockito.mock(ArchiveEntryExtractor.class);
         return new DetermineServiceCreateUpdateServiceActionsStep();
     }
 

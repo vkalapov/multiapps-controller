@@ -132,6 +132,8 @@
           <flowable:in source="appsTaskExecutionTimeout" target="appsTaskExecutionTimeout"></flowable:in>
           <flowable:in source="taskExecutionTimeoutDefault" target="taskExecutionTimeoutDefault"></flowable:in>
           <flowable:in source="mtaDeploymentDescriptor" target="mtaDeploymentDescriptor"></flowable:in>
+          <flowable:in source="resolvedExternalFiles" target="resolvedExternalFiles"></flowable:in>
+          <flowable:in source="externalConfigurationRequiresDependency" target="externalConfigurationRequiresDependency"></flowable:in>
       </extensionElements>
       <multiInstanceLoopCharacteristics isSequential="false" flowable:collection="hooksForExecution" flowable:elementVariable="hookForExecution"></multiInstanceLoopCharacteristics>
     </callActivity>
@@ -142,6 +144,7 @@
       <extensionElements>
         <flowable:in source="appToProcess" target="appToProcess"></flowable:in>
         <flowable:in source="servicesToBind" target="servicesToBind"></flowable:in>
+
       </extensionElements>
       <multiInstanceLoopCharacteristics isSequential="false" flowable:collection="servicesToUnbindBind" flowable:elementVariable="serviceToUnbindBind">
         <extensionElements></extensionElements>

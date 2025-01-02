@@ -35,6 +35,8 @@
         <flowable:in source="dynamicResolvableParameters" target="dynamicResolvableParameters"></flowable:in>
         <flowable:in source="ctsCurrentFileInfo" target="ctsCurrentFileInfo"></flowable:in>
         <flowable:in source="archiveEntriesPositions" target="archiveEntriesPositions"></flowable:in>
+        <flowable:in source="resolvedExternalFiles" target="resolvedExternalFiles"></flowable:in>
+        <flowable:in source="externalConfigurationResources" target="externalConfigurationResources"></flowable:in>
       </extensionElements>
       <multiInstanceLoopCharacteristics isSequential="false" flowable:collection="servicesToCreate" flowable:elementVariable="serviceToProcess">
         <extensionElements></extensionElements>

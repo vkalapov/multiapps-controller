@@ -90,11 +90,10 @@ class ServiceBindingParametersGetterTest {
 
     @ParameterizedTest
     @MethodSource
-    void testGetServiceBindingParametersFromMta(Map<String, Object> descriptorParameters, Map<String, Object> expectedParameters) {
+    void testGetServiceBindingParametersFromMta(Map<String, String> descriptorParameters, Map<String, Object> expectedParameters) {
         CloudApplicationExtended application = buildApplication(descriptorParameters);
         CloudServiceInstanceExtended serviceInstance = buildServiceInstance();
         prepareContext(serviceInstance);
-
         Map<String, Object> bindingParameters = serviceBindingParametersGetter.getServiceBindingParametersFromMta(application, SERVICE_NAME);
 
         assertEquals(expectedParameters, bindingParameters);
@@ -158,7 +157,33 @@ class ServiceBindingParametersGetterTest {
         verify(stepLogger).warnWithoutProgressMessage(anyString(), any(Object[].class));
     }
 
-    private CloudApplicationExtended buildApplication(Map<String, Object> descriptorParameters) {
+    @Test
+    void testGetServiceBindingParametersFromFile() {
+        CloudApplicationExtended application = buildApplication(Map.of("param1", "value1", "param2", "value2"));
+        CloudServiceInstanceExtended serviceInstance = buildServiceInstance();
+        prepareContext(serviceInstance);
+        when(context.getVariable(Variables.EXTERNAL_CONFIGURATION_REQUIRES_DEPENDENCY)).thenReturn(Map.of(APP_NAME + "/" + SERVICE_NAME, "fileName"));
+        when(context.getVariable(Variables.RESOLVED_EXTERNAL_FILES)).thenReturn(Map.of("fileName", Map.of("fileParam", "fileKey")));
+
+        Map<String, Object> bindingParameters = serviceBindingParametersGetter.getServiceBindingParametersFromMta(application, SERVICE_NAME);
+
+        assertEquals(Map.of("fileParam", "fileKey", "param1", "value1", "param2", "value2"), bindingParameters);
+    }
+
+    @Test
+    void testGetServiceBindingParametersFromFileShouldNotOverride() {
+        CloudApplicationExtended application = buildApplication(Map.of("param1", "value1", "param2", "value2"));
+        CloudServiceInstanceExtended serviceInstance = buildServiceInstance();
+        prepareContext(serviceInstance);
+        when(context.getVariable(Variables.EXTERNAL_CONFIGURATION_REQUIRES_DEPENDENCY)).thenReturn(Map.of(APP_NAME + "/" + SERVICE_NAME, "fileName"));
+        when(context.getVariable(Variables.RESOLVED_EXTERNAL_FILES)).thenReturn(Map.of("fileName", Map.of("param1", "shouldNotOverride")));
+
+        Map<String, Object> bindingParameters = serviceBindingParametersGetter.getServiceBindingParametersFromMta(application, SERVICE_NAME);
+
+        assertEquals(Map.of("param1", "value1", "param2", "value2"), bindingParameters);
+    }
+
+    private CloudApplicationExtended buildApplication(Map<String, String> descriptorParameters) {
         ImmutableCloudApplicationExtended.Builder applicationBuilder = ImmutableCloudApplicationExtended.builder()
                                                                                                         .name(APP_NAME)
                                                                                                         .moduleName(APP_NAME)
@@ -194,6 +219,7 @@ class ServiceBindingParametersGetterTest {
         when(context.getVariable(Variables.SPACE_GUID)).thenReturn(TEST_SPACE_GUID);
         when(context.getRequiredVariable(Variables.SPACE_GUID)).thenReturn(TEST_SPACE_GUID);
         when(context.getControllerClient()).thenReturn(client);
+        when(context.getVariable(Variables.EXTERNAL_CONFIGURATION_REQUIRES_DEPENDENCY)).thenReturn(Collections.emptyMap());
     }
 
     private void prepareClient(Map<String, Object> bindingParameters, boolean serviceBindingExist) {

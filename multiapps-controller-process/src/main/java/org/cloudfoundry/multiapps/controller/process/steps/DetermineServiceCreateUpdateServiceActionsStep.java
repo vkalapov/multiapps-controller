@@ -13,6 +13,7 @@ import org.cloudfoundry.client.v3.Metadata;
 import org.cloudfoundry.multiapps.common.SLException;
 import org.cloudfoundry.multiapps.common.util.JsonUtil;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudServiceInstanceExtended;
+import org.cloudfoundry.multiapps.controller.client.lib.domain.ImmutableCloudServiceInstanceExtended;
 import org.cloudfoundry.multiapps.controller.core.cf.v2.ResourceType;
 import org.cloudfoundry.multiapps.controller.core.security.serialization.SecureSerialization;
 import org.cloudfoundry.multiapps.controller.process.Constants;
@@ -20,6 +21,7 @@ import org.cloudfoundry.multiapps.controller.process.Messages;
 import org.cloudfoundry.multiapps.controller.process.util.DynamicResolvableParametersContextUpdater;
 import org.cloudfoundry.multiapps.controller.process.util.ServiceAction;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
+import org.cloudfoundry.multiapps.mta.util.PropertiesUtil;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 
@@ -71,7 +73,22 @@ public class DetermineServiceCreateUpdateServiceActionsStep extends SyncFlowable
     }
 
     private void setServiceParameters(ProcessContext context, CloudServiceInstanceExtended service) {
+        service = resolveFileBindingCredentials(context, service);
         context.setVariable(Variables.SERVICE_TO_PROCESS, service);
+    }
+
+    private CloudServiceInstanceExtended resolveFileBindingCredentials(ProcessContext context, CloudServiceInstanceExtended service) {
+        String resolvedConfigurationFileName = context.getVariable(Variables.EXTERNAL_CONFIGURATION_RESOURCES)
+                                                      .get(service.getName());
+        Map<String, Object> resolvedExternalFiles = context.getVariable(Variables.RESOLVED_EXTERNAL_FILES);
+        Map<String, Object> resolvedConfiguration = (Map<String, Object>) resolvedExternalFiles.get(resolvedConfigurationFileName);
+        if (resolvedConfiguration != null) {
+            Map<String, Object> existingCredentials = ObjectUtils.defaultIfNull(service.getCredentials(), Collections.emptyMap());
+            Map<String, Object> result = PropertiesUtil.mergeExtensionProperties(resolvedConfiguration, existingCredentials);
+            return ImmutableCloudServiceInstanceExtended.copyOf(service)
+                                                        .withCredentials(result);
+        }
+        return service;
     }
 
     private List<ServiceAction> determineActions(ProcessContext context, CloudServiceInstanceExtended service, CloudServiceInstance existingService) {
