@@ -239,6 +239,8 @@ class DetermineServiceCreateUpdateServiceActionsStepTest extends SyncFlowableSte
         context.setVariable(Variables.DELETE_SERVICE_KEYS, true);
         context.setVariable(Variables.DELETE_SERVICES, input.shouldDeleteServices);
         context.setVariable(Variables.DYNAMIC_RESOLVABLE_PARAMETERS, dynamicResolvableParameters);
+        context.setVariable(Variables.SHOULD_BACKUP_PREVIOUS_VERSION, false);
+
     }
 
     private void prepareClient(StepInput input) {
@@ -318,7 +320,7 @@ class DetermineServiceCreateUpdateServiceActionsStepTest extends SyncFlowableSte
     @Override
     protected DetermineServiceCreateUpdateServiceActionsStep createStep() {
         archiveEntryExtractor = Mockito.mock(ArchiveEntryExtractor.class);
-        return new DetermineServiceCreateUpdateServiceActionsStep();
+        return new DetermineServiceCreateUpdateServiceActionsStep(archiveEntryExtractor);
     }
 
     private static class StepInput {

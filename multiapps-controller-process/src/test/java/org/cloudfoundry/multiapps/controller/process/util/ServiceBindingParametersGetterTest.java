@@ -8,12 +8,14 @@ import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudMetadata;
 import com.sap.cloudfoundry.client.facade.domain.ImmutableCloudServiceBinding;
 import com.sap.cloudfoundry.client.facade.domain.ImmutableServiceCredentialBindingOperation;
 import com.sap.cloudfoundry.client.facade.domain.ServiceCredentialBindingOperation;
+import org.cloudfoundry.multiapps.common.util.JsonUtil;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudApplicationExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.CloudServiceInstanceExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.ImmutableBindingDetails;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.ImmutableCloudApplicationExtended;
 import org.cloudfoundry.multiapps.controller.client.lib.domain.ImmutableCloudServiceInstanceExtended;
 import org.cloudfoundry.multiapps.controller.core.helpers.MtaArchiveElements;
+import org.cloudfoundry.multiapps.controller.persistence.services.FileService;
 import org.cloudfoundry.multiapps.controller.process.steps.ProcessContext;
 import org.cloudfoundry.multiapps.controller.process.variables.Variables;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,12 +68,15 @@ class ServiceBindingParametersGetterTest {
     @Mock
     private CloudControllerClient client;
 
+    @Mock
+    private FileService fileService;
+
     private ServiceBindingParametersGetter serviceBindingParametersGetter;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        serviceBindingParametersGetter = new ServiceBindingParametersGetter(context);
+        serviceBindingParametersGetter = new ServiceBindingParametersGetter(context, archiveEntryExtractor, 0, fileService);
 
     }
 
@@ -93,8 +98,9 @@ class ServiceBindingParametersGetterTest {
     void testGetServiceBindingParametersFromMta(Map<String, Object> descriptorParameters, Map<String, Object> expectedParameters) {
         CloudApplicationExtended application = buildApplication(descriptorParameters);
         CloudServiceInstanceExtended serviceInstance = buildServiceInstance();
+        prepareMtaArchiveElements(expectedParameters);
         prepareContext(serviceInstance);
-
+        prepareFileService(expectedParameters);
         Map<String, Object> bindingParameters = serviceBindingParametersGetter.getServiceBindingParametersFromMta(application, SERVICE_NAME);
 
         assertEquals(expectedParameters, bindingParameters);
@@ -194,6 +200,19 @@ class ServiceBindingParametersGetterTest {
         when(context.getVariable(Variables.SPACE_GUID)).thenReturn(TEST_SPACE_GUID);
         when(context.getRequiredVariable(Variables.SPACE_GUID)).thenReturn(TEST_SPACE_GUID);
         when(context.getControllerClient()).thenReturn(client);
+        when(context.getVariable(Variables.SHOULD_BACKUP_PREVIOUS_VERSION)).thenReturn(false);
+
+    }
+
+    private void prepareMtaArchiveElements(Map<String, Object> filedProvidedParameters) {
+        if (filedProvidedParameters != null) {
+            when(mtaArchiveElements.getRequiredDependencyFileName(anyString())).thenReturn(SERVICE_BINDING_PARAMETERS_FILENAME);
+        }
+    }
+
+    private void prepareFileService(Map<String, Object> fileProvidedParameters) {
+        String fileProvidedParametersJson = JsonUtil.toJson(fileProvidedParameters);
+        when(archiveEntryExtractor.extractEntryBytes(any(), any())).thenReturn(fileProvidedParametersJson.getBytes());
     }
 
     private void prepareClient(Map<String, Object> bindingParameters, boolean serviceBindingExist) {

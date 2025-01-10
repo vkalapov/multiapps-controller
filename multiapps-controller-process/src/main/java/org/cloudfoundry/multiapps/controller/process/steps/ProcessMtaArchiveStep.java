@@ -65,8 +65,11 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
 
         ContentLengthTracker sizeTracker = new ContentLengthTracker();
         ExternalFileProcessor fileProcessor = new ExternalFileProcessor(sizeTracker, configuration.getMaxResourceFileSize(), fileService);
-        MtaArchiveContentResolver contentResolver = new MtaArchiveContentResolver(deploymentDescriptor, configuration, fileProcessor, sizeTracker);
-        contentResolver.resolveMtaArchiveFilesInDescriptor(context.getVariable(Variables.SPACE_GUID), appArchiveId, helper);
+        
+        if (context.getVariable(Variables.SHOULD_BACKUP_PREVIOUS_VERSION)) {
+            MtaArchiveContentResolver contentResolver = new MtaArchiveContentResolver(deploymentDescriptor, configuration, fileProcessor, sizeTracker);
+            contentResolver.resolveMtaArchiveFilesInDescriptor(context.getVariable(Variables.SPACE_GUID), appArchiveId, helper);
+        }
 
         MtaArchiveElements mtaArchiveElements = new MtaArchiveElements();
         addMtaArchiveModulesInMtaArchiveElements(context, helper, mtaArchiveElements);
@@ -133,7 +136,7 @@ public class ProcessMtaArchiveStep extends SyncFlowableStep {
         getStepLogger().debug(Messages.MTA_DESCRIPTOR_LENGTH_0_MESSAGE, inflatedDeploymentDescriptor.length);
         return deploymentDescriptor;
     }
-    
+
     private void setMtaIdForProcess(ProcessContext context) {
         DeploymentDescriptor deploymentDescriptor = context.getVariable(Variables.DEPLOYMENT_DESCRIPTOR);
         String mtaId = deploymentDescriptor.getId();
